@@ -74,45 +74,8 @@ function createProcess(callback) {
   executeStatements([statement], callback);
 }
 
-function setupProcessApi(router, io) {
-  // Get processes
-  router.get('/processes', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    getProcesses(info => res.send(info));
-  });
-  
-  router.get('/processes/:guid', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    getProcess(req.params.guid, info => res.send(info));
-  });
-  
-  // Create process
-  router.post('/processes', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    createProcess(function(info){
-      io.emit('updated', 'processes'); 
-      res.send(info);
-    });
-  });
-  
-  // Delete processes
-  router.delete('/processes', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    io.emit('updated', 'processes');
-    deleteProcesses(function(info){
-      io.emit('updated', 'processes'); 
-      res.send(info);
-    });
-  });
-  
-  router.delete('/processes/:guid', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    io.emit('updated', 'processes');
-    deleteProcess(req.params.guid, function(info){
-      io.emit('updated', 'processes'); 
-      res.send(info);
-    });
-  });
-}
-
-module.exports.setupProcessApi = setupProcessApi;
+module.exports.getProcesses = getProcesses;
+module.exports.getProcess = getProcess;
+module.exports.deleteProcess = deleteProcess;
+module.exports.deleteProcesses = deleteProcesses;
+module.exports.createProcess = createProcess;
