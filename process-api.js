@@ -1,5 +1,11 @@
 var express = require('express');
 var processes = require('./api/processes.js');
+var io = require('socket.io-emitter')({ host: 'redis.core.djbnjack.svc.tutum.io', port: 6379 });
+var os = require("os");
+
+setInterval(function(){
+  io.emit('system', 'ping from ' + os.hostname());
+}, 5000);
 
 var app = express();
 
