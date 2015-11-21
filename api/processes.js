@@ -74,7 +74,7 @@ function createProcess(callback) {
   executeStatements([statement], callback);
 }
 
-function setupProcessApi(router) {
+function setupProcessApi(router, io) {
   // Get processes
   router.get('/processes', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
@@ -89,18 +89,29 @@ function setupProcessApi(router) {
   // Create process
   router.post('/processes', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
-    createProcess(info => res.send(info));
+    createProcess(function(info){
+      io.emit('updated', 'processes'); 
+      res.send(info);
+    });
   });
   
   // Delete processes
   router.delete('/processes', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
-    deleteProcesses(info => res.send(info));
+    io.emit('updated', 'processes');
+    deleteProcesses(function(info){
+      io.emit('updated', 'processes'); 
+      res.send(info);
+    });
   });
   
   router.delete('/processes/:guid', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
-    deleteProcess(req.params.guid, info => res.send(info));
+    io.emit('updated', 'processes');
+    deleteProcess(req.params.guid, function(info){
+      io.emit('updated', 'processes'); 
+      res.send(info);
+    });
   });
 }
 
