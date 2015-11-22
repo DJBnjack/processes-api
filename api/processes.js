@@ -1,12 +1,19 @@
 var request = require('request');
 var btoa = function (str) {return new Buffer(str).toString('base64');};
-var baseNeoURI = 'http://neo4j.core.djbnjack.svc.tutum.io:8080';
+var baseNeoURL = '';
+
+var setBaseURL = function(url) {
+  baseNeoURL = url;
+} 
+
 var authorizationHeader = {	'Authorization': 'Basic ' + btoa("neo4j:vetman2") };  
 var uuid = require('node-uuid');
 
-function executeStatements(statements, callback){
+var executeStatements = function(statements, callback){
+  if (baseNeoURL === '') return; 
+  
   var options = {
-    url: baseNeoURI + '/db/data/transaction/commit',
+    url: baseNeoURL + '/db/data/transaction/commit',
     headers: authorizationHeader,
     json: true,
     method: 'POST',
@@ -14,7 +21,11 @@ function executeStatements(statements, callback){
   };
   
   request(options, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (response == undefined) {
+      console.log(error);
+      console.log(response);
+      console.log(body);
+    } else if (!error && response.statusCode == 200) {
       callback(JSON.stringify(body.results[0].data, null, 2));
     } else if (response.statusCode == 404) {
       callback(JSON.stringify("Not found", null, 2));
@@ -79,3 +90,4 @@ module.exports.getProcess = getProcess;
 module.exports.deleteProcess = deleteProcess;
 module.exports.deleteProcesses = deleteProcesses;
 module.exports.createProcess = createProcess;
+module.exports.setBaseURL = setBaseURL;

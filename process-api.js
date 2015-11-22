@@ -1,26 +1,40 @@
 var express = require('express');
 var processes = require('./api/processes.js');
-var io = require('socket.io-emitter')({ host: 'redis.core.djbnjack.svc.tutum.io', port: 6379 });
+var io_emitter = require('socket.io-emitter');
+var client = require('socket.io-client')('http://socketserver.messaging.djbnjack.svc.tutum.io:3210');
+// var client = require('socket.io-client')('http://localhost:3210');
 var os = require("os");
 
-// Send ping every minute to socket.io server
-setInterval(function(){
-  io.emit('system', 'ping from ' + os.hostname());
-}, 60000);
+var io;
+var sendUpdate = function() {
+  if (io != null) io.emit('updated', 'processes'); 
+}
+
+client.on('urls', function(msg){
+  console.log(msg.redis_url);
+  io = io_emitter(msg.redis_url);
+  processes.setBaseURL(msg.neo4j_url);
+  
+  // Send ping every minute to socket.io server
+  setInterval(function(){
+    io.emit('system', 'ping from ' + os.hostname());
+  }, 60000);
+});
+
 
 var app = express();
  
 // Add cross-origin headers
 app.use(function (req, res, next) {
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Pass to next layer of middleware
-    next();
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  
+  // Pass to next layer of middleware
+  next();
 });
 
 // Setup process api
@@ -41,7 +55,7 @@ router.get('/processes/:guid', function(req, res) {
 router.post('/processes', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   processes.createProcess(function(info){
-    io.emit('updated', 'processes'); 
+    sendUpdate();
     res.send(info);
   });
 });
@@ -50,7 +64,7 @@ router.post('/processes', function(req, res) {
 router.delete('/processes', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   processes.deleteProcesses(function(info){
-    io.emit('updated', 'processes'); 
+    sendUpdate();
     res.send(info);
   });
 });
@@ -58,7 +72,7 @@ router.delete('/processes', function(req, res) {
 router.delete('/processes/:guid', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   processes.deleteProcess(req.params.guid, function(info){
-    io.emit('updated', 'processes'); 
+    sendUpdate();
     res.send(info);
   });
 });
