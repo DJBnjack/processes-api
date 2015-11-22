@@ -36,7 +36,6 @@ router.post('/processes', function(req, res) {
 // Delete processes
 router.delete('/processes', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
-  io.emit('updated', 'processes');
   processes.deleteProcesses(function(info){
     io.emit('updated', 'processes'); 
     res.send(info);
@@ -45,7 +44,6 @@ router.delete('/processes', function(req, res) {
 
 router.delete('/processes/:guid', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
-  io.emit('updated', 'processes');
   processes.deleteProcess(req.params.guid, function(info){
     io.emit('updated', 'processes'); 
     res.send(info);
