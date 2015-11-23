@@ -11,7 +11,8 @@ var sendUpdate = function() {
 }
 
 client.on('urls', function(msg){
-  console.log(msg.redis_url);
+  console.log('Got URLS', msg);  
+
   io = io_emitter(msg.redis_url);
   processes.setBaseURL(msg.neo4j_url);
   

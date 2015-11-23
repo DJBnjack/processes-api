@@ -22,9 +22,9 @@ var executeStatements = function(statements, callback){
   
   request(options, function (error, response, body) {
     if (response == undefined) {
-      console.log(error);
-      console.log(response);
-      console.log(body);
+      console.log('error', error);
+      console.log('response', response);
+      console.log('body', body);
     } else if (!error && response.statusCode == 200) {
       callback(JSON.stringify(body.results[0].data, null, 2));
     } else if (response.statusCode == 404) {
