@@ -1,7 +1,7 @@
 var express = require('express');
 var processes = require('./api/processes.js');
-// var client = require('socket.io-client')('http://socketserver.messaging.djbnjack.svc.tutum.io:3210');
-var client = require('socket.io-client')('http://localhost:3210');
+var client = require('socket.io-client')('http://socketserver-1.messaging.djbnjack.cont.tutum.io:3210');
+// var client = require('socket.io-client')('http://localhost:3210');
 var os = require("os");
 
 var sendUpdate = function() {
