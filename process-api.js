@@ -1,24 +1,20 @@
 var express = require('express');
 var processes = require('./api/processes.js');
-var io_emitter = require('socket.io-emitter');
-var client = require('socket.io-client')('http://socketserver.messaging.djbnjack.svc.tutum.io:3210');
-// var client = require('socket.io-client')('http://localhost:3210');
+// var client = require('socket.io-client')('http://socketserver.messaging.djbnjack.svc.tutum.io:3210');
+var client = require('socket.io-client')('http://localhost:3210');
 var os = require("os");
 
-var io;
 var sendUpdate = function() {
-  if (io != null) io.emit('updated', 'processes'); 
+  client.emit('updated', 'processes'); 
 }
 
 client.on('urls', function(msg){
   console.log('Got URLS', msg);  
-
-  io = io_emitter(msg.redis_url);
   processes.setBaseURL(msg.neo4j_url);
   
   // Send ping every minute to socket.io server
   setInterval(function(){
-    io.emit('system', 'ping from ' + os.hostname());
+    client.emit('system', 'ping from ' + os.hostname());
   }, 60000);
 });
 
