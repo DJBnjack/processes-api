@@ -1,4 +1,5 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var processes = require('./api/processes.js');
 var client = require('socket.io-client')('http://socketserver-1.messaging.djbnjack.cont.tutum.io:3210');
 // var client = require('socket.io-client')('http://localhost:3210');
@@ -18,6 +19,10 @@ client.on('urls', function(msg){
   }, 60000);
 });
 
+// This should work in node.js and other ES5 compliant implementations.
+function isEmptyObject(obj) {
+  return !Object.keys(obj).length;
+}
 
 var app = express();
  
@@ -31,6 +36,18 @@ app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   
   // Pass to next layer of middleware
+  next();
+});
+
+app.use(bodyParser.json()); // for parsing application/json
+
+// simple logger for this router's requests
+// all requests to this router will first hit this middleware
+app.use(function(req, res, next) {
+  console.log('%s %s %s', req.method, req.url, req.path);
+  if (!isEmptyObject(req.body)) {
+    console.log(req.body);
+  }
   next();
 });
 
@@ -51,7 +68,16 @@ router.get('/processes/:guid', function(req, res) {
 // Create process
 router.post('/processes', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
-  processes.createProcess(function(info){
+  processes.createProcess(req.body, function(info){
+    sendUpdate();
+    res.send(info);
+  });
+});
+
+// Update process
+router.put('/processes/:guid', function (req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  processes.updateProcess(req.params.guid, function(info){
     sendUpdate();
     res.send(info);
   });

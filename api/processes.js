@@ -6,6 +6,11 @@ var setBaseURL = function(url) {
   baseNeoURL = url;
 } 
 
+// This should work in node.js and other ES5 compliant implementations.
+function isEmptyObject(obj) {
+  return !Object.keys(obj).length;
+}
+
 var authorizationHeader = {	'Authorization': 'Basic ' + btoa("neo4j:vetman2") };  
 var uuid = require('node-uuid');
 
@@ -63,9 +68,9 @@ function deleteProcesses(callback) {
   executeStatements([statement], callback);
 };
 
-function createProcess(callback) {
+function createProcess(body, callback) {
   var nodes = [
-    "(z:node {name:'First Process', type:'process', state:'new', guid:'<GUID>'})",
+    "(z:node {name:'<NAME>', type:'process', state:'new', guid:'<GUID>'})",
     "(a:node {name:'Start', type:'start', state:'new'})",
     "(b:node {name:'Wait for approval', type:'input', state:'new'})",
     "(c:node {name:'End', type:'end', state:'new'})"
@@ -81,7 +86,24 @@ function createProcess(callback) {
   });
 
   var instanceString = templateString.replace(/<GUID>/g, uuid.v4());
+  if (!isEmptyObject(body)) {
+    instanceString = instanceString.replace(/<NAME>/g, body.name);    
+  } else {
+    instanceString = instanceString.replace(/<NAME>/g, "Name undefined");
+  }
+  
   var statement = { "statement": "Create p="+instanceString };
+  executeStatements([statement], callback);
+}
+
+function updateProcess(guid, callback) {
+  var templateString = "MATCH (n {type: 'process', guid: '<GUID>'}) "+
+    "WITH n "+
+    "SET n.state = 'finished' "+
+    "RETURN n";
+    
+  var instanceString = templateString.replace(/<GUID>/g, guid);
+  var statement = { "statement": instanceString };
   executeStatements([statement], callback);
 }
 
@@ -90,4 +112,5 @@ module.exports.getProcess = getProcess;
 module.exports.deleteProcess = deleteProcess;
 module.exports.deleteProcesses = deleteProcesses;
 module.exports.createProcess = createProcess;
+module.exports.updateProcess = updateProcess;
 module.exports.setBaseURL = setBaseURL;
