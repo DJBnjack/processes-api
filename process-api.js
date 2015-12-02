@@ -3,7 +3,7 @@ var bodyParser = require('body-parser');
 var processes = require('./api/processes.js');
 var client = require('socket.io-client')('http://socketserver-1.messaging.djbnjack.cont.tutum.io:3210');
 var SDC = require('statsd-client'),
-    sdc = new SDC({host: 'statsd.core.djbnjack.svc.tutum.io'});
+    sdc = new SDC({host: 'statsd.core.djbnjack.svc.tutum.io', debug: true});
 // var client = require('socket.io-client')('http://localhost:3210');
 var os = require("os");
 
@@ -43,7 +43,7 @@ app.use(function (req, res, next) {
 
 app.use(bodyParser.json()); // for parsing application/json
 
-app.use(sdc.helpers.getExpressMiddleware('process-api'));
+app.use(sdc.helpers.getExpressMiddleware('process-api', { timeByUrl: true }));
 
 // simple logger for this router's requests
 // all requests to this router will first hit this middleware
