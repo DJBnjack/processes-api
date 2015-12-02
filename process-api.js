@@ -2,6 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var processes = require('./api/processes.js');
 var client = require('socket.io-client')('http://socketserver-1.messaging.djbnjack.cont.tutum.io:3210');
+var SDC = require('statsd-client'),
+    sdc = new SDC({host: 'statsd.core.djbnjack.svc.tutum.io'});
 // var client = require('socket.io-client')('http://localhost:3210');
 var os = require("os");
 
@@ -45,6 +47,7 @@ app.use(bodyParser.json()); // for parsing application/json
 // all requests to this router will first hit this middleware
 app.use(function(req, res, next) {
   console.log('%s %s %s', req.method, req.url, req.path);
+  sdc.increment('process-api.' + req.path);
   if (!isEmptyObject(req.body)) {
     console.log(req.body);
   }
