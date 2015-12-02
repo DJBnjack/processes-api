@@ -43,11 +43,12 @@ app.use(function (req, res, next) {
 
 app.use(bodyParser.json()); // for parsing application/json
 
+app.use(sdc.helpers.getExpressMiddleware('process-api'));
+
 // simple logger for this router's requests
 // all requests to this router will first hit this middleware
 app.use(function(req, res, next) {
   console.log('%s %s %s', req.method, req.url, req.path);
-  sdc.increment('process-api.' + req.path);
   if (!isEmptyObject(req.body)) {
     console.log(req.body);
   }
