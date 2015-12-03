@@ -13,6 +13,7 @@ var sendUpdate = function() {
 
 client.on('urls', function(msg){
   console.log('Got URLS', msg);  
+  sdc.increment('process-api.startup');
   processes.setBaseURL(msg.neo4j_url);
   
   // Send ping every minute to socket.io server
